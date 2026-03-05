@@ -247,4 +247,4 @@ The agent doesn't replace your product intuition — it augments it with continu
 
 ---
 
-*Built by Advocate Zero. Questions? Open an issue on the [repo](https://github.com/LouisShark/advocate-zero).*
+*Built by Advocate Zero. Questions? Open an issue on the [repo](https://github.com/zexiro/advocate-zero).*

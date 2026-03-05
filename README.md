@@ -63,7 +63,7 @@ See [`agent/orchestrator.py`](./agent/orchestrator.py) for the core architecture
 
 ```bash
 # Clone
-git clone https://github.com/LouisShark/advocate-zero.git
+git clone https://github.com/zexiro/advocate-zero.git
 cd advocate-zero
 
 # Install
