@@ -298,57 +298,52 @@ class ApplicationAgent:
 
             # --- Scroll to bottom to find submit button ---
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            await page.wait_for_timeout(1000)
+            await page.wait_for_timeout(2000)
 
-            # --- CAPTCHA: Wait for operator to solve ---
-            print()
-            print("  " + "=" * 56)
-            print("  AGENT: All form fields filled.")
-            print()
-            print("  OPERATOR: Please solve the reCAPTCHA now.")
-            print("  The agent will click Submit automatically")
-            print("  once CAPTCHA is solved.")
-            print("  " + "=" * 56)
-            print()
+            # --- Click Submit ---
+            self.log("Looking for submit button...")
 
-            # Wait for reCAPTCHA to be solved (check for response token)
-            self.log("Waiting for operator to solve reCAPTCHA...")
-            captcha_solved = False
-            for _ in range(120):  # Wait up to 10 minutes
-                try:
-                    solved = await page.evaluate("""
-                        () => {
-                            const resp = document.querySelector('[name="g-recaptcha-response"]');
-                            return resp && resp.value && resp.value.length > 0;
-                        }
-                    """)
-                    if solved:
-                        captcha_solved = True
-                        break
-                except Exception:
-                    pass
-                await page.wait_for_timeout(5000)
-
-            if captcha_solved:
-                self.log("reCAPTCHA solved! Clicking Submit...")
-                await page.wait_for_timeout(1000)
-
-                # Click the submit button
+            # Try many selector strategies for the submit button
+            submitted = await self.try_click(
+                page,
+                'button[type="submit"]',
+                'button:has-text("Submit application")',
+                'button:has-text("Submit")',
+                'input[type="submit"]',
+            )
+            if not submitted:
+                # Try finding any button at the bottom of the form
                 submitted = await self.try_click(
                     page,
-                    'button[type="submit"]',
-                    'button:has-text("Submit")',
-                    'input[type="submit"]',
                     'button:has-text("Apply")',
+                    'form button:last-of-type',
+                    '[role="button"]:has-text("Submit")',
+                    'button:has-text("Send")',
                 )
-                if submitted:
-                    self.info("Submit button clicked!")
-                    await page.wait_for_timeout(5000)
-                    self.log("Application submitted successfully.")
-                else:
-                    self.info("Could not find submit button — please click it manually")
+            if not submitted:
+                # Broad search: find all buttons and click the one with submit-like text
+                buttons = page.locator("button")
+                count = await buttons.count()
+                self.info(f"Found {count} buttons, searching for submit...")
+                for i in range(count):
+                    try:
+                        btn = buttons.nth(i)
+                        text = await btn.text_content()
+                        if text and any(w in text.lower() for w in ["submit", "apply", "send"]):
+                            self.info(f"Found button: '{text.strip()}'")
+                            await btn.scroll_into_view_if_needed()
+                            await btn.click()
+                            submitted = True
+                            break
+                    except Exception:
+                        continue
+
+            if submitted:
+                self.info("Submit button clicked!")
+                await page.wait_for_timeout(5000)
+                self.log("Application submitted.")
             else:
-                self.log("Timed out waiting for CAPTCHA.")
+                self.info("Could not find submit button — please click it manually")
 
             print()
             print("  " + "=" * 56)
