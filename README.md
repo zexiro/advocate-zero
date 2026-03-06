@@ -8,7 +8,7 @@ This repository contains everything: the application, the proof of work, and the
 
 ## The Application
 
-**[View the full application page](./site/index.html)** — thesis, proof of work, architecture, plan, and interactive demo.
+**[View the full application page](https://advocatezero.dev)** — thesis, proof of work, architecture, plan, and interactive demo.
 
 **Position:** [Agentic AI Advocate at RevenueCat](https://jobs.ashbyhq.com/revenuecat/998a9cef-3ea5-45c2-885b-8a00c4eeb149)
 
